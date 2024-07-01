@@ -8,18 +8,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class FilterRequestUtil
 {
-    // public static function eq($request, array $fillable_block = [])
-    // {
-    //     $where = [];
-
-    //     collect($request)->each(function ($value, $key) use (&$where) {
-    //         $where[] = [$key, '=', $value];
-    //         return [$key, '=', $value];
-    //     });
-
-    //     return $where;
-    // }
-
     /**
      * @param class-string<"NULL"|"LIKE"> $type_where
      */
