@@ -1,0 +1,15 @@
+{
+    "name": "rostislav/laravel-filters",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Rostislav\\LaravelFilters\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Rostislav"
+        }
+    ],
+    "require": {}
+}
