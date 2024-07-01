@@ -1,15 +1,19 @@
 {
-    "name": "rostislav/laravel-filters",
-    "type": "library",
-    "autoload": {
-        "psr-4": {
-            "Rostislav\\LaravelFilters\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "Rostislav"
-        }
-    ],
-    "require": {}
+  "name": "rostislav/laravel-filters",
+  "license": "MIT",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Rostislav\\LaravelFilters\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Rostislav"
+    }
+  ],
+  "require": {
+    "php": "^7.*|^8.*",
+    "laravel/framework": "8.*|9.*|10.*|11.*"
+  }
 }
