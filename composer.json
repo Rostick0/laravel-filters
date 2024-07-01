@@ -2,6 +2,12 @@
   "name": "rostislav/laravel-filters",
   "license": "MIT",
   "type": "library",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/Rostick0/laravel-filters"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "Rostislav\\LaravelFilters\\": "src/"
