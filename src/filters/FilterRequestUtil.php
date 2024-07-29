@@ -2,7 +2,6 @@
 
 namespace Rostislav\LaravelFilters\Filters;
 
-use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Database\Eloquent\builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 

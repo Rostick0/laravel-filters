@@ -4,7 +4,6 @@ namespace Rostislav\LaravelFilters\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Database\Eloquent\Casts\Json;
 
 class FilterHasRequestUtil
 {
