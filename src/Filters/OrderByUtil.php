@@ -53,7 +53,7 @@ class OrderByUtil
                     $relat_parent = $relat->getForeignKeyName();
                 }
 
-                $builder->join(
+                $builder->leftJoin(
                     $relat_table,
                     $my_relat->getModel()->getTable() . '.' . $relat_child,
                     '=',
