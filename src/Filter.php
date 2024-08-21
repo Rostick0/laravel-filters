@@ -27,6 +27,12 @@ class Filter
             foreach (array_slice($q_request, 1) as $param) {
                 $data->union(FilterQResuestUtil::setParam($request->filterQ, Filter::query($request, $model, $fillable_block, $where), $param));
             }
+
+            if ($request->has('sort')) $data = OrderByUtil::set($request->sort, $data);
+            if (get_class($model) !== 'Illuminate\Database\Query\Builder') {
+                $data = $data?->withCount(QueryString::convertToArray($request->extendsCount));
+                $data = QueryWith::setSum($request, $data);
+            }
         } else {
             $data = Filter::query($request, $model, $fillable_block, $where);
         }
