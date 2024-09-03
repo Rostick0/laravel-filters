@@ -13,7 +13,7 @@ class QueryString
 
     public static function convertSumToArray($string)
     {
-        $data = QueryString::convertToArray($string);
+        $data = self::convertToArray($string);
         $array_data = [];
 
         foreach ($data as $item) {

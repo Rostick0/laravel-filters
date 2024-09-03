@@ -24,7 +24,7 @@ class FilterSomeRequestUtil
             }
 
             foreach ($values as $once) {
-                $builder = FilterSomeRequestUtil::once(
+                $builder = self::once(
                     $type_where,
                     $once->column_value ?? null,
                     $once->value ?? null,
@@ -84,20 +84,20 @@ class FilterSomeRequestUtil
     {
         $data = $builder;
 
-        if ($request->filterSomeEQ) $data = FilterSomeRequestUtil::template($request->filterSomeEQ, $builder, $fillable_block, '=');
-        if ($request->filterSomeNEQ) $data = FilterSomeRequestUtil::template($request->filterSomeNEQ, $builder, $fillable_block, '!=');
+        if ($request->filterSomeEQ) $data = self::template($request->filterSomeEQ, $builder, $fillable_block, '=');
+        if ($request->filterSomeNEQ) $data = self::template($request->filterSomeNEQ, $builder, $fillable_block, '!=');
 
-        if ($request->filterSomeEQN) $data = FilterSomeRequestUtil::template($request->filterSomeEQN, $builder, $fillable_block, '=', 'NULL');
-        if ($request->filterSomeNEQN) $data = FilterSomeRequestUtil::template($request->filterSomeNEQN, $builder, $fillable_block, '!=', 'NULL');
+        if ($request->filterSomeEQN) $data = self::template($request->filterSomeEQN, $builder, $fillable_block, '=', 'NULL');
+        if ($request->filterSomeNEQN) $data = self::template($request->filterSomeNEQN, $builder, $fillable_block, '!=', 'NULL');
 
-        if ($request->filterSomeGEQ) $data = FilterSomeRequestUtil::template($request->filterSomeGEQ, $builder, $fillable_block, '>=');
-        if ($request->filterSomeLEQ) $data = FilterSomeRequestUtil::template($request->filterSomeLEQ, $builder, $fillable_block, '<=');
-        if ($request->filterSomeGE) $data = FilterSomeRequestUtil::template($request->filterSomeGE, $builder, $fillable_block, '>');
-        if ($request->filterSomeLE) $data = FilterSomeRequestUtil::template($request->filterSomeLE, $builder, $fillable_block, '<');
+        if ($request->filterSomeGEQ) $data = self::template($request->filterSomeGEQ, $builder, $fillable_block, '>=');
+        if ($request->filterSomeLEQ) $data = self::template($request->filterSomeLEQ, $builder, $fillable_block, '<=');
+        if ($request->filterSomeGE) $data = self::template($request->filterSomeGE, $builder, $fillable_block, '>');
+        if ($request->filterSomeLE) $data = self::template($request->filterSomeLE, $builder, $fillable_block, '<');
 
-        if ($request->filterSomeLIKE) $data = FilterSomeRequestUtil::template($request->filterSomeLIKE, $builder, $fillable_block, 'LIKE', 'LIKE');
+        if ($request->filterSomeLIKE) $data = self::template($request->filterSomeLIKE, $builder, $fillable_block, 'LIKE', 'LIKE');
 
-        if ($request->filterSomeIN) $data = FilterSomeRequestUtil::in($request->filterSomeIN, $builder, $fillable_block);
+        if ($request->filterSomeIN) $data = self::in($request->filterSomeIN, $builder, $fillable_block);
 
         return $data;
     }

@@ -14,14 +14,14 @@ class OrderByUtil
 
     private static function type(string $name): string
     {
-        if (OrderByUtil::checkMinus($name)) return 'ASC';
+        if (self::checkMinus($name)) return 'ASC';
 
         return 'DESC';
     }
 
     private static function removeMinus(string $name): string
     {
-        if (OrderByUtil::checkMinus($name)) return substr($name, 1);
+        if (self::checkMinus($name)) return substr($name, 1);
 
         return $name;
     }
@@ -39,7 +39,7 @@ class OrderByUtil
 
         if (count($name_array) > 1) {
             foreach ((array_slice($name_array, 1)) as $key => $value) {
-                $relat = $my_relat->getRelation(OrderByUtil::removeMinus($name_array[$key]));
+                $relat = $my_relat->getRelation(self::removeMinus($name_array[$key]));
                 $relat_table = $relat->getModel()->getTable();
 
                 $relat_parent = null;
@@ -68,10 +68,10 @@ class OrderByUtil
         $sort_name .= end($name_array);
 
         return $builder->orderBy(
-            OrderByUtil::removeMinus(
+            self::removeMinus(
                 $sort_name
             ) ?? 'id',
-            OrderByUtil::type($name)
+            self::type($name)
         );
     }
 
@@ -82,7 +82,7 @@ class OrderByUtil
         $data = explode(',', $name);
 
         foreach ($data as $item) {
-            $builder = OrderByUtil::one($item, $builder);
+            $builder = self::one($item, $builder);
         }
 
         return $builder;
