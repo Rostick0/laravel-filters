@@ -49,7 +49,9 @@ class Filter
             $data = $model;
         } else {
             $data = $model->query();
-            $data = $data->with(QueryString::convertToArray($request['extends']));
+            if (isset($request['extends'])) {
+                $data = $data->with(QueryString::convertToArray($request['extends']));
+            }
         }
 
         $data = FilterRequestUtil::all($request, $data, $fillable_block);
@@ -57,7 +59,7 @@ class Filter
         $data = FilterHasUtil::all($request, $data, $fillable_block);
         $data = FilterSomeRequestUtil::all($request, $data, $fillable_block);
         if (isset($request['sort'])) $data = OrderByUtil::set($request['sort'], $data);
-        if (get_class($model) !== 'Illuminate\Database\Query\Builder') {
+        if (get_class($model) !== 'Illuminate\Database\Query\Builder' && isset($request['extendsCount'])) {
             $data = $data?->withCount(QueryString::convertToArray($request['extendsCount']));
             $data = QueryWith::setSum($request, $data);
         }
@@ -69,11 +71,15 @@ class Filter
 
     public static function one($request, Model $model, int $id, array $where = [])
     {
-        $data = $model->with(QueryString::convertToArray($request['extends']));
-        // получение количества
-        $data = $data?->withCount(QueryString::convertToArray($request['extendsCount']));
-        // получение суммы
-        $data = QueryWith::setSum($request, $data);
+        if (isset($request['extends'])) {
+            $data = $model->with(QueryString::convertToArray($request['extends']));
+        }
+        if (isset($request['extendsCount'])) {
+            // получение количества
+            $data = $data?->withCount(QueryString::convertToArray($request['extendsCount']));
+            // получение суммы
+            $data = QueryWith::setSum($request, $data);
+        }
         $data = Filter::where($data, $where);
         $data = $data->findOrFail($id);
 
