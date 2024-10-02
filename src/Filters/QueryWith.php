@@ -9,7 +9,7 @@ class QueryWith
 {
     public static function setSum($request, builder|QueryBuilder $data)
     {
-        foreach (QueryString::convertSumToArray($request->extendsSum) as $item) {
+        foreach (QueryString::convertSumToArray($request['extendsSum']) as $item) {
             $data = $data?->withSum($item[0], $item[1]);
         }
 

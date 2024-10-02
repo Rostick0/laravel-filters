@@ -84,20 +84,20 @@ class FilterSomeRequestUtil
     {
         $data = $builder;
 
-        if ($request->filterSomeEQ) $data = self::template($request->filterSomeEQ, $builder, $fillable_block, '=');
-        if ($request->filterSomeNEQ) $data = self::template($request->filterSomeNEQ, $builder, $fillable_block, '!=');
+        if (isset($request['filterSomeEQ'])) $data = self::template($request['filterSomeEQ'], $builder, $fillable_block, '=');
+        if (isset($request['filterSomeNEQ'])) $data = self::template($request['filterSomeNEQ'], $builder, $fillable_block, '!=');
 
-        if ($request->filterSomeEQN) $data = self::template($request->filterSomeEQN, $builder, $fillable_block, '=', 'NULL');
-        if ($request->filterSomeNEQN) $data = self::template($request->filterSomeNEQN, $builder, $fillable_block, '!=', 'NULL');
+        if (isset($request['filterSomeEQN'])) $data = self::template($request['filterSomeEQN'], $builder, $fillable_block, '=', 'NULL');
+        if (isset($request['filterSomeNEQN'])) $data = self::template($request['filterSomeNEQN'], $builder, $fillable_block, '!=', 'NULL');
 
-        if ($request->filterSomeGEQ) $data = self::template($request->filterSomeGEQ, $builder, $fillable_block, '>=');
-        if ($request->filterSomeLEQ) $data = self::template($request->filterSomeLEQ, $builder, $fillable_block, '<=');
-        if ($request->filterSomeGE) $data = self::template($request->filterSomeGE, $builder, $fillable_block, '>');
-        if ($request->filterSomeLE) $data = self::template($request->filterSomeLE, $builder, $fillable_block, '<');
+        if (isset($request['filterSomeGEQ'])) $data = self::template($request['filterSomeGEQ'], $builder, $fillable_block, '>=');
+        if (isset($request['filterSomeLEQ'])) $data = self::template($request['filterSomeLEQ'], $builder, $fillable_block, '<=');
+        if (isset($request['filterSomeGE'])) $data = self::template($request['filterSomeGE'], $builder, $fillable_block, '>');
+        if (isset($request['filterSomeLE'])) $data = self::template($request['filterSomeLE'], $builder, $fillable_block, '<');
 
-        if ($request->filterSomeLIKE) $data = self::template($request->filterSomeLIKE, $builder, $fillable_block, 'LIKE', 'LIKE');
+        if (isset($request['filterSomeLIKE'])) $data = self::template($request['filterSomeLIKE'], $builder, $fillable_block, 'LIKE', 'LIKE');
 
-        if ($request->filterSomeIN) $data = self::in($request->filterSomeIN, $builder, $fillable_block);
+        if (isset($request['filterSomeIN'])) $data = self::in($request['filterSomeIN'], $builder, $fillable_block);
 
         return $data;
     }

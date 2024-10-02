@@ -27,13 +27,13 @@ class FilterHasUtil
     {
         $data = $builder;
 
-        if ($request->hasEQ) $data = FilterHasUtil::template($request->hasEQ, $builder, $fillable_block, '=');
-        if ($request->hasNEQ) $data = FilterHasUtil::template($request->hasNEQ, $builder, $fillable_block, '!=');
+        if (isset($request['hasEQ'])) $data = FilterHasUtil::template($request['hasEQ'], $builder, $fillable_block, '=');
+        if (isset($request['hasNEQ'])) $data = FilterHasUtil::template($request['hasNEQ'], $builder, $fillable_block, '!=');
 
-        if ($request->hasGEQ) $data = FilterHasUtil::template($request->hasGEQ, $builder, $fillable_block, '>=');
-        if ($request->hasLEQ) $data = FilterHasUtil::template($request->hasLEQ, $builder, $fillable_block, '<=');
-        if ($request->hasCE) $data = FilterHasUtil::template($request->hasCE, $builder, $fillable_block, '>');
-        if ($request->hasLE) $data = FilterHasUtil::template($request->hasLE, $builder, $fillable_block, '<');
+        if (isset($request['hasGEQ'])) $data = FilterHasUtil::template($request['hasGEQ'], $builder, $fillable_block, '>=');
+        if (isset($request['hasLEQ'])) $data = FilterHasUtil::template($request['hasLEQ'], $builder, $fillable_block, '<=');
+        if (isset($request['hasCE'])) $data = FilterHasUtil::template($request['hasCE'], $builder, $fillable_block, '>');
+        if (isset($request['hasLE'])) $data = FilterHasUtil::template($request['hasLE'], $builder, $fillable_block, '<');
 
         return $data;
     }
