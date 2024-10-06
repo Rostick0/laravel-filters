@@ -71,6 +71,7 @@ class Filter
 
     public static function one($request, Model $model, int $id, array $where = [])
     {
+        $data = $model::query();
         if (isset($request['extends'])) {
             $data = $model->with(QueryString::convertToArray($request['extends']));
         }
