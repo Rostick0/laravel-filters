@@ -52,6 +52,12 @@ class Filter
             if (isset($request['extends'])) {
                 $data = $data->with(QueryString::convertToArray($request['extends']));
             }
+
+            if (isset($request['doesntHave'])) {
+                foreach (QueryString::convertToArray($request['doesntHave']) as $doesntHaveitem) {
+                    $data = $data->doesntHave($doesntHaveitem);
+                }
+            }
         }
 
         $data = FilterRequestUtil::all($request, $data, $fillable_block);
@@ -81,6 +87,12 @@ class Filter
             // получение суммы
             $data = QueryWith::setSum($request, $data);
         }
+        if (isset($request['doesntHave'])) {
+            foreach (QueryString::convertToArray($request['doesntHave']) as $doesntHaveitem) {
+                $data = $data->doesntHave($doesntHaveitem);
+            }
+        }
+
         $data = Filter::where($data, $where);
         $data = $data->findOrFail($id);
 
@@ -91,6 +103,14 @@ class Filter
     {
         // where для вложенных данных
         foreach ($where as $dataWhere) {
+            if (!empty($dataWhere[4])) {
+                $data->whereDoesntHave($dataWhere[3], function ($query) use ($dataWhere) {
+                    $query->where($dataWhere[0], $dataWhere[1], $dataWhere[2]);
+                });
+
+                continue;
+            }
+
             // 0 - название колонки, 1 - оператор (=, LIKE и прочее), 2 - значение, 3 - название связи 
             if (!empty($dataWhere[3])) {
                 $data->whereHas($dataWhere[3], function ($query) use ($dataWhere) {
@@ -99,6 +119,8 @@ class Filter
 
                 continue;
             }
+
+
 
             $data->where([$dataWhere]);
         }
