@@ -58,7 +58,7 @@ class OrderByUtil
                     $my_relat->getModel()->getTable() . '.' . $relat_child,
                     '=',
                     $relat_table . '.' . $relat_parent
-                );
+                )->distinct();
 
                 $sort_name = $relat_table . '.';
                 $my_relat = $relat;
