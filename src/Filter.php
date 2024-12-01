@@ -13,15 +13,16 @@ use Rostislav\LaravelFilters\Filters\QueryWith;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Filter
 {
-    public static function all($request, Model|QueryBuilder $model, array $fillable_block = [], array $where = [], array $q_request = []): Paginator
+    public static function all($request, Model|QueryBuilder $model, array $fillable_block = [], array $where = [], array $q_request = [], bool $is_paginate = true)
     {
         $data = null;
 
         // значение по нескольким столбам
-        if ($q_request) {
+        if ($q_request && $request['filterQ']) {
             $data = FilterQResuestUtil::setParam($request['filterQ'], Filter::query($request, $model, $fillable_block, $where), $q_request[0]);
 
             foreach (array_slice($q_request, 1) as $param) {
@@ -37,7 +38,7 @@ class Filter
             $data = Filter::query($request, $model, $fillable_block, $where);
         }
 
-        $data = $data->paginate($request['limit']);
+        if ($is_paginate) return $data->paginate($request['limit']);
 
         return $data;
     }
@@ -50,7 +51,7 @@ class Filter
         } else {
             $data = $model->query();
             if (isset($request['extends'])) {
-                $data = $data->with(QueryString::convertToArray($request['extends']));
+                $data = $data->with(relations: QueryString::convertToArray($request['extends']));
             }
 
             if (isset($request['doesntHave'])) {
@@ -99,7 +100,7 @@ class Filter
         return $data;
     }
 
-    private static function where($data, $where)
+    public static function where($data, $where)
     {
         // where для вложенных данных
         foreach ($where as $dataWhere) {
@@ -119,8 +120,6 @@ class Filter
 
                 continue;
             }
-
-
 
             $data->where([$dataWhere]);
         }
