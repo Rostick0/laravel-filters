@@ -18,7 +18,7 @@ class FilterRequestUtil
 
             if (!empty($fillable_block) && array_search($key, $fillable_block) !== false) return;
             $where = [];
-
+            $key = $builder->getModel()->getTable() . '.' . $key;
 
             if (!isset($value)) {
             } else if ($type_where === 'NULL') {
@@ -42,6 +42,7 @@ class FilterRequestUtil
 
             if (!empty($fillable) && array_search($key, $fillable) !== false) return;
             $where = QueryString::convertToArray($value);
+            $key = $builder->getModel()->getTable() . '.' . $key;
 
             if ($is_not) {
                 $builder->whereNotIn($key, $where);
