@@ -4,6 +4,7 @@ namespace Rostislav\LaravelFilters\Filters;
 
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class OrderByUtil
 {
@@ -53,12 +54,23 @@ class OrderByUtil
                     $relat_parent = $relat->getForeignKeyName();
                 }
 
+
+                $exists = DB::selectOne(
+                    "SELECT EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?) AS `value`",
+                    [$table, 'id']
+                );
+
                 $builder->leftJoin(
                     $relat_table,
                     $my_relat->getModel()->getTable() . '.' . $relat_child,
                     '=',
                     $relat_table . '.' . $relat_parent
-                )->groupBy(['id']);
+                );
+
+                if ($exists->value) {
+                    $builder->groupBy($table . '.id');
+                }
+
 
                 $sort_name = $relat_table . '.';
                 $my_relat = $relat;
@@ -67,12 +79,13 @@ class OrderByUtil
 
         $sort_name .= end($name_array);
 
-        return $builder->orderBy(
-            self::removeMinus(
-                $sort_name
-            ) ?? 'id',
-            self::type($name)
-        );
+        return $sort_name ?
+            $builder->orderBy(
+                self::removeMinus(
+                    $sort_name
+                ),
+                self::type($name)
+            ) : $builder;
     }
 
     public static function set(?string $name, Builder $builder): Builder
