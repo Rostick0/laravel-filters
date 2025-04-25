@@ -27,7 +27,7 @@ class OrderByUtil
         return $name;
     }
 
-    public static function one(?string $name, Builder $builder): Builder
+    public static function one(?string $name, Builder $builder, ?string $id_name = 'id'): Builder
     {
         if (!$name) return $builder;
 
@@ -57,19 +57,19 @@ class OrderByUtil
 
                 $exists = DB::selectOne(
                     "SELECT EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?) AS `value`",
-                    [$table, 'id']
+                    [$table, $id_name]
                 );
 
                 $builder->leftJoin(
                     $relat_table,
-                    $my_relat->getModel()->getTable() . '.' . $relat_child,
-                    '=',
-                    $relat_table . '.' . $relat_parent
+                    function ($join) use ($my_relat, $relat_child, $relat_table, $relat_parent, $table, $exists, $id_name) {
+                        $join->on($my_relat->getModel()->getTable() . '.' . $relat_child, '=', $relat_table . '.' . $relat_parent);
+                        if ($exists) {
+                            $join->groupBy($table . '.' . $id_name);
+                        }
+                    }
                 );
 
-                if ($exists->value) {
-                    $builder->groupBy($table . '.id');
-                }
 
 
                 $sort_name = $relat_table . '.';
@@ -88,14 +88,14 @@ class OrderByUtil
             ) : $builder;
     }
 
-    public static function set(?string $name, Builder $builder): Builder
+    public static function set(?string $name, Builder $builder, ?string $id_name = 'id'): Builder
     {
         if (!$name) return $builder;
 
         $data = explode(',', $name);
 
         foreach ($data as $item) {
-            $builder = self::one($item, $builder);
+            $builder = self::one($item, $builder, $id_name);
         }
 
         return $builder;

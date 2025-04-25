@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Filter
 {
-    public static function all($request, Model|QueryBuilder $model, array $fillable_block = [], array $where = [], array $q_request = [], bool $is_paginate = true)
+    public static function all($request, Model|QueryBuilder $model, array $fillable_block = [], array $where = [], array $q_request = [], bool $is_paginate = true, ?string $id_name = 'id')
     {
         $data = null;
 
@@ -29,13 +29,13 @@ class Filter
                 $data->union(FilterQResuestUtil::setParam($request['filterQ'], Filter::query($request, $model, $fillable_block, $where), $param));
             }
 
-            if (isset($request['sort'])) $data = OrderByUtil::set($request['sort'], $data);
+            if (isset($request['sort'])) $data = OrderByUtil::set($request['sort'], $data, $id_name);
             if (get_class($model) !== 'Illuminate\Database\Query\Builder') {
                 $data = $data?->withCount(QueryString::convertToArray($request['extendsCount']));
                 $data = QueryWith::setSum($request, $data);
             }
         } else {
-            $data = Filter::query($request, $model, $fillable_block, $where);
+            $data = Filter::query($request, $model, $fillable_block, $where, $id_name);
         }
 
         if ($is_paginate) return $data->paginate($request['limit']);
@@ -43,7 +43,7 @@ class Filter
         return $data;
     }
 
-    public static function query($request, Model|QueryBuilder $model, array $fillable_block = [], array $where = [])
+    public static function query($request, Model|QueryBuilder $model, array $fillable_block = [], array $where = [], ?string $id_name = 'id')
     {
         $data = null;
         if (get_class($model) === 'Illuminate\Database\Query\Builder') {
@@ -65,7 +65,7 @@ class Filter
         $data = FilterHasRequestUtil::all($request, $data, $fillable_block);
         $data = FilterHasUtil::all($request, $data, $fillable_block);
         $data = FilterSomeRequestUtil::all($request, $data, $fillable_block);
-        if (isset($request['sort'])) $data = OrderByUtil::set($request['sort'], $data);
+        if (isset($request['sort'])) $data = OrderByUtil::set($request['sort'], $data, $id_name);
         if (get_class($model) !== 'Illuminate\Database\Query\Builder' && isset($request['extendsCount'])) {
             $data = $data?->withCount(QueryString::convertToArray($request['extendsCount']));
             $data = QueryWith::setSum($request, $data);
