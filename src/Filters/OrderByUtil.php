@@ -27,7 +27,7 @@ class OrderByUtil
         return $name;
     }
 
-    public static function one(?string $name, Builder $builder, ?string $id_name = 'id'): Builder
+    public static function one(?string $name, Builder $builder): Builder
     {
         if (!$name) return $builder;
 
