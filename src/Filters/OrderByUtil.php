@@ -54,19 +54,10 @@ class OrderByUtil
                     $relat_parent = $relat->getForeignKeyName();
                 }
 
-
-                $exists = DB::selectOne(
-                    "SELECT EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?) AS `value`",
-                    [$table, $id_name]
-                );
-
                 $builder->leftJoin(
                     $relat_table,
-                    function ($join) use ($my_relat, $relat_child, $relat_table, $relat_parent, $table, $exists, $id_name) {
+                    function ($join) use ($my_relat, $relat_child, $relat_table, $relat_parent) {
                         $join->on($my_relat->getModel()->getTable() . '.' . $relat_child, '=', $relat_table . '.' . $relat_parent);
-                        if ($exists) {
-                            $join->groupBy($table . '.' . $id_name);
-                        }
                     }
                 );
 
@@ -88,14 +79,14 @@ class OrderByUtil
             ) : $builder;
     }
 
-    public static function set(?string $name, Builder $builder, ?string $id_name = 'id'): Builder
+    public static function set(?string $name, Builder $builder): Builder
     {
         if (!$name) return $builder;
 
         $data = explode(',', $name);
 
         foreach ($data as $item) {
-            $builder = self::one($item, $builder, $id_name);
+            $builder = self::one($item, $builder);
         }
 
         return $builder;
