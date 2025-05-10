@@ -27,7 +27,7 @@ class OrderByUtil
         return $name;
     }
 
-    public static function one(?string $name, Builder $builder): Builder
+    public static function one(?string $name, Builder $builder, ?string $id_name = 'id'): Builder
     {
         if (!$name) return $builder;
 
@@ -56,12 +56,20 @@ class OrderByUtil
 
                 $builder->leftJoin(
                     $relat_table,
-                    function ($join) use ($my_relat, $relat_child, $relat_table, $relat_parent) {
+                    function ($join) use ($my_relat, $relat_child, $relat_table, $relat_parent, $relat) {
                         $join->on($my_relat->getModel()->getTable() . '.' . $relat_child, '=', $relat_table . '.' . $relat_parent);
+
+                        $query = $relat->getQuery()->toBase();
+                        foreach ($query->wheres ?? [] as $where) {
+                            foreach ($where['query']->wheres ?? [] as $where) {
+
+                                if ($where['type'] === 'Basic') {
+                                    $join->where($relat_table . '.' . $where['column'], $where['operator'], $where['value']);
+                                }
+                            }
+                        }
                     }
                 );
-
-
 
                 $sort_name = $relat_table . '.';
                 $my_relat = $relat;
