@@ -6,13 +6,24 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
+// Утилита для сортировки
 class OrderByUtil
 {
+    /**
+     * Проверяет наличие минуса
+     * @param string $name
+     * @return bool
+     */
     private static function checkMinus(string $name): bool
     {
         return $name[0] == '-';
     }
 
+    /**
+     * Тип сортировки
+     * @param string $name
+     * @return string
+     */
     private static function type(string $name): string
     {
         if (self::checkMinus($name)) return 'ASC';
@@ -20,6 +31,11 @@ class OrderByUtil
         return 'DESC';
     }
 
+    /**
+     * Удаляет минус
+     * @param string $name
+     * @return string
+     */
     private static function removeMinus(string $name): string
     {
         if (self::checkMinus($name)) return substr($name, 1);
@@ -27,6 +43,13 @@ class OrderByUtil
         return $name;
     }
 
+    /**
+     * Создает сортировку для одного запроса
+     * @param string|null $name
+     * @param Builder $builder
+     * @param string|null $id_name
+     * @return Builder
+     */
     public static function one(?string $name, Builder $builder, ?string $id_name = 'id'): Builder
     {
         if (!$name) return $builder;
@@ -87,6 +110,12 @@ class OrderByUtil
             ) : $builder;
     }
 
+    /**
+     * Сортирует по всем запросам
+     * @param string|null $name
+     * @param Builder $builder
+     * @return Builder
+     */
     public static function set(?string $name, Builder $builder): Builder
     {
         if (!$name) return $builder;

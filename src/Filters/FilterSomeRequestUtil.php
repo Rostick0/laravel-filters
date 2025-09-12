@@ -9,9 +9,14 @@ use Illuminate\Database\Eloquent\Casts\Json;
 class FilterSomeRequestUtil
 {
     /**
-     * @param class-string<"NULL"|"LIKE"> $type_where
+     * Шаблон для работы с фильтрацией по связи
+     * @param $request
+     * @param Builder|QueryBuilder $builder
+     * @param array $fillable_block
+     * @param string $type
+     * @param string|null $type_where "NULL"|"LIKE"
+     * @return Builder|QueryBuilder
      */
-
     public static function template($request, Builder|QueryBuilder $builder, array $fillable_block = [], $type = '=', ?string $type_where = "NULL|LIKE"): Builder|QueryBuilder
     {
         collect($request)->each(function ($value, $key) use ($builder, $fillable_block, $type, $type_where) {
@@ -41,6 +46,17 @@ class FilterSomeRequestUtil
         return $builder;
     }
 
+    /**
+     * Вызов одного фильтра
+     * @param $type_where
+     * @param $column_value
+     * @param $value
+     * @param $type
+     * @param $builder
+     * @param $key
+     * @param $where
+     * @return mixed
+     */
     private static function once($type_where, $column_value, $value, $type, $builder, $key, $where)
     {
         if (ctype_digit($value)) $value = (int) $value;
@@ -59,6 +75,13 @@ class FilterSomeRequestUtil
         });
     }
 
+    /**
+     * Вызов одного фильтра с типом in в запросах where
+     * @param $request
+     * @param Builder|QueryBuilder $builder
+     * @param array $fillable_block
+     * @return Builder|QueryBuilder
+     */
     private static function in($request, Builder|QueryBuilder $builder, array $fillable_block = [])
     {
         collect($request)->each(function ($value, $key) use ($builder, $fillable_block) {
@@ -80,6 +103,13 @@ class FilterSomeRequestUtil
         return $builder;
     }
 
+    /**
+     * Вызов всех фильтров
+     * @param $request
+     * @param Builder|QueryBuilder $builder
+     * @param array $fillable_block
+     * @return Builder|QueryBuilder
+     */
     public static function all($request, Builder|QueryBuilder $builder, array $fillable_block = []): Builder|QueryBuilder
     {
         $data = $builder;

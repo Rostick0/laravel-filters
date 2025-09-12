@@ -26,7 +26,7 @@ class Filter
             $data = FilterQResuestUtil::setParam($request['filterQ'], Filter::query($request, $model, $fillable_block, $where), $q_request[0]);
 
             foreach (array_slice($q_request, 1) as $param) {
-                $data->union(FilterQResuestUtil::setParam($request['filterQ'], Filter::query($request, $model, $fillable_block, $where), $param));
+                $data->union(   FilterQResuestUtil::setParam($request['filterQ'], Filter::query($request, $model, $fillable_block, $where), $param));
             }
 
             if (isset($request['sort'])) $data = OrderByUtil::set($request['sort'], $data);

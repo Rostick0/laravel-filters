@@ -4,14 +4,24 @@ namespace Rostislav\LaravelFilters\Filters;
 
 class QueryString
 {
-    public static function convertToArray($string)
+    /**
+     * Конверитурет строковые значение через запятую в массив
+     * @param string|null $string
+     * @return array
+     */
+    public static function convertToArray(string|null $string): array
     {
         if (empty($string)) return [];
 
         return explode(',', $string);
     }
 
-    public static function convertSumToArray($string)
+    /**
+     * Конверитурет строковые значение суммы в массив
+     * @param string|null $string
+     * @return array
+     */
+    public static function convertSumToArray(string|null $string): array
     {
         $data = self::convertToArray($string);
         $array_data = [];

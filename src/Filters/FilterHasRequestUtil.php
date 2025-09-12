@@ -5,6 +5,7 @@ namespace Rostislav\LaravelFilters\Filters;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
+// Утилита для сортировки
 class FilterHasRequestUtil
 {
     /**
