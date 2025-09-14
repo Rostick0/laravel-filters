@@ -4,15 +4,22 @@ namespace Rostislav\LaravelFilters\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\Request;
 
 // Утилита для сортировки
 class FilterHasRequestUtil
 {
     /**
-     * @param class-string<"NULL"|"LIKE"> $type_where
+     * Шаблон для работы с фильтрацией по связи
+     * @param array $request
+     * @param Builder|QueryBuilder $builder
+     * @param array $fillable_block
+     * @param string $type
+     * @param string|null $type_where "NULL"|"LIKE"
+     * @return Builder|QueryBuilder
      */
 
-    public static function template($request, Builder|QueryBuilder $builder, array $fillable_block = [], $type = '=', ?string $type_where = "NULL|LIKE"): Builder|QueryBuilder
+    public static function template(array $request, Builder|QueryBuilder $builder, array $fillable_block = [], $type = '=', ?string $type_where = "NULL|LIKE"): Builder|QueryBuilder
     {
         collect($request)->each(function ($value, $name) use ($builder, $fillable_block, $type, $type_where) {
             if (!FilterTypeUtil::check($name)) return;
@@ -43,7 +50,15 @@ class FilterHasRequestUtil
         return $builder;
     }
 
-    public static function in($request, Builder|QueryBuilder $builder, array $fillable = [], bool $is_not = false): Builder|QueryBuilder
+    /**
+     * Вызов одного фильтра с типом in в запросах where
+     * @param array $request
+     * @param Builder|QueryBuilder $builder
+     * @param array $fillable
+     * @param bool $is_not
+     * @return Builder|QueryBuilder
+     */
+    public static function in(array $request, Builder|QueryBuilder $builder, array $fillable = [], bool $is_not = false): Builder|QueryBuilder
     {
         collect($request)->each(function ($value, $key) use ($builder, $fillable, $is_not) {
             if (!FilterTypeUtil::check($key)) return;
@@ -69,25 +84,32 @@ class FilterHasRequestUtil
         return $builder;
     }
 
-    public static function all($request, Builder|QueryBuilder $builder, array $fillable_block = []): Builder|QueryBuilder
+    /**
+     * Вызов всех фильтров
+     * @param Request $request
+     * @param Builder|QueryBuilder $builder
+     * @param array $fillable_block
+     * @return Builder|QueryBuilder
+     */
+    public static function all(Request $request, Builder|QueryBuilder $builder, array $fillable_block = []): Builder|QueryBuilder
     {
         $data = $builder;
 
-        if (isset($request['filterEQ'])) $data = self::template($request['filterEQ'], $builder, $fillable_block, '=');
-        if (isset($request['filterNEQ'])) $data = self::template($request['filterNEQ'], $builder, $fillable_block, '!=');
+        if (isset($request['filterEQ'])) self::template($request['filterEQ'], $builder, $fillable_block, '=');
+        if (isset($request['filterNEQ'])) self::template($request['filterNEQ'], $builder, $fillable_block, '!=');
 
-        if (isset($request['filterEQN'])) $data = self::template($request['filterEQN'], $builder, $fillable_block, '=', 'NULL');
-        if (isset($request['filterNEQN'])) $data = self::template($request['filterNEQN'], $builder, $fillable_block, '!=', 'NULL');
+        if (isset($request['filterEQN'])) self::template($request['filterEQN'], $builder, $fillable_block, '=', 'NULL');
+        if (isset($request['filterNEQN'])) self::template($request['filterNEQN'], $builder, $fillable_block, '!=', 'NULL');
 
-        if (isset($request['filterGEQ'])) $data = self::template($request['filterGEQ'], $builder, $fillable_block, '>=');
-        if (isset($request['filterLEQ'])) $data = self::template($request['filterLEQ'], $builder, $fillable_block, '<=');
-        if (isset($request['filterGE'])) $data = self::template($request['filterGE'], $builder, $fillable_block, '>');
-        if (isset($request['filterLE'])) $data = self::template($request['filterLE'], $builder, $fillable_block, '<');
+        if (isset($request['filterGEQ'])) self::template($request['filterGEQ'], $builder, $fillable_block, '>=');
+        if (isset($request['filterLEQ'])) self::template($request['filterLEQ'], $builder, $fillable_block, '<=');
+        if (isset($request['filterGE'])) self::template($request['filterGE'], $builder, $fillable_block, '>');
+        if (isset($request['filterLE'])) self::template($request['filterLE'], $builder, $fillable_block, '<');
 
-        if (isset($request['filterLIKE'])) $data = self::template($request['filterLIKE'], $builder, $fillable_block, 'LIKE', 'LIKE');
+        if (isset($request['filterLIKE'])) self::template($request['filterLIKE'], $builder, $fillable_block, 'LIKE', 'LIKE');
 
-        if (isset($request['filterIN'])) $data = self::in($request['filterIN'], $builder, $fillable_block);
-        if (isset($request['filterNotIN'])) $data = self::in($request['filterNotIN'], $builder, $fillable_block, true);
+        if (isset($request['filterIN'])) self::in($request['filterIN'], $builder, $fillable_block);
+        if (isset($request['filterNotIN'])) self::in($request['filterNotIN'], $builder, $fillable_block, true);
 
         return $data;
     }

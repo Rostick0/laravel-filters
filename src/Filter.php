@@ -14,25 +14,37 @@ use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 
 class Filter
 {
-    public static function all($request, Model|QueryBuilder $model, array $fillable_block = [], array $where = [], array $q_request = [], bool $is_paginate = true)
+    /**
+     * Получить все записи с фильтрацией и пагинацией.
+     *
+     * @param Request $request
+     * @param Model|QueryBuilder $model
+     * @param array $fillableBlock Список полей, доступных для фильтрации
+     * @param array $where Вложенные условия (whereHas/whereDoesntHave)
+     * @param array $qRequest Список полей для поиска по `filterQ`
+     * @param bool $isPaginate Включить пагинацию
+     * @return Paginator|Builder
+     */
+    public static function all(Request $request, Model|QueryBuilder $model, array $fillable_block = [], array $where = [], array $q_request = [], bool $is_paginate = true): Paginator|Builder
     {
-        $data = null;
-
         // значение по нескольким столбам
-        if ($q_request && $request['filterQ']) {
+        if ($q_request && $request->has('filterQ')) {
             $data = FilterQResuestUtil::setParam($request['filterQ'], Filter::query($request, $model, $fillable_block, $where), $q_request[0]);
 
             foreach (array_slice($q_request, 1) as $param) {
-                $data->union(   FilterQResuestUtil::setParam($request['filterQ'], Filter::query($request, $model, $fillable_block, $where), $param));
+                $data->union(FilterQResuestUtil::setParam($request['filterQ'], Filter::query($request, $model, $fillable_block, $where), $param));
             }
 
-            if (isset($request['sort'])) $data = OrderByUtil::set($request['sort'], $data);
-            if (get_class($model) !== 'Illuminate\Database\Query\Builder') {
-                $data = $data?->withCount(QueryString::convertToArray($request['extendsCount']));
-                $data = QueryWith::setSum($request, $data);
+            if ($request->has('sort')) {
+                OrderByUtil::set($request['sort'], $data);
+            }
+            if ($model instanceof Model) {
+                $data?->withCount(QueryString::convertToArray($request['extendsCount']));
+                QueryWith::setSum($request, $data);
             }
         } else {
             $data = Filter::query($request, $model, $fillable_block, $where);
@@ -43,87 +55,107 @@ class Filter
         return $data;
     }
 
-    public static function query($request, Model|QueryBuilder $model, array $fillable_block = [], array $where = [])
+    /**
+     * Базовая логика построения запроса с фильтрами.
+     *
+     * @param Request $request
+     * @param Model|QueryBuilder $model
+     * @param array $fillableBlock
+     * @param array $where
+     * @return Builder|QueryBuilder
+     */
+    public static function query(Request $request, Model|QueryBuilder $model, array $fillable_block = [], array $where = []): Builder|QueryBuilder
     {
-        $data = null;
-        if (get_class($model) === 'Illuminate\Database\Query\Builder') {
+        if ($model instanceof \Illuminate\Database\Query\Builder) {
             $data = $model;
         } else {
             $data = $model->query();
-            if (isset($request['extends'])) {
-                $data = $data->with(relations: QueryString::convertToArray($request['extends']));
+            if ($request->has('extends')) {
+                $data->with(QueryString::convertToArray($request['extends']));
             }
 
-            if (isset($request['doesntHave'])) {
+            if ($request->has('doesntHave')) {
                 foreach (QueryString::convertToArray($request['doesntHave']) as $doesntHaveitem) {
-                    $data = $data->doesntHave($doesntHaveitem);
+                    $data->doesntHave($doesntHaveitem);
                 }
             }
         }
 
-        $data = FilterRequestUtil::all($request, $data, $fillable_block);
-        $data = FilterHasRequestUtil::all($request, $data, $fillable_block);
-        $data = FilterHasUtil::all($request, $data, $fillable_block);
-        $data = FilterSomeRequestUtil::all($request, $data, $fillable_block);
-        if (isset($request['sort'])) $data = OrderByUtil::set($request['sort'], $data);
-        if (get_class($model) !== 'Illuminate\Database\Query\Builder' && isset($request['extendsCount'])) {
-            $data = $data?->withCount(QueryString::convertToArray($request['extendsCount']));
-            $data = QueryWith::setSum($request, $data);
+        FilterRequestUtil::all($request, $data, $fillable_block);
+        FilterHasRequestUtil::all($request, $data, $fillable_block);
+        FilterHasUtil::all($request, $data, $fillable_block);
+        FilterSomeRequestUtil::all($request, $data, $fillable_block);
+        if ($request->has('sort')) {
+            OrderByUtil::set($request['sort'], $data);
+        }
+        if (!($model instanceof \Illuminate\Database\Query\Builder) && $request->has('extendsCount')) {
+            $data?->withCount(QueryString::convertToArray($request['extendsCount']));
+            QueryWith::setSum($request, $data);
         }
 
-        if ($where) $data = Filter::where($data, $where);
+        if (!empty($where)) {
+            Filter::applyWhereConditions($data, $where);
+        }
 
         return $data;
     }
 
-    public static function one($request, Model $model, int $id, array $where = [])
+    /**
+     * Получить одну запись по ID с фильтрацией.
+     *
+     * @param Request $request
+     * @param Model $model
+     * @param int $id
+     * @param array $where
+     * @return Model
+     */
+    public static function one(Request $request, Model $model, int $id, array $where = []): Model
     {
-        $data = $model::query();
-        if (isset($request['extends'])) {
+        $data = $model->query();
+
+        if ($request->has('extends')) {
             $data = $model->with(QueryString::convertToArray($request['extends']));
         }
-        if (isset($request['extendsCount'])) {
-            // получение количества
-            $data = $data?->withCount(QueryString::convertToArray($request['extendsCount']));
-            // получение суммы
-            $data = QueryWith::setSum($request, $data);
+        if ($request->has('extendsCount')) {
+            $data?->withCount(QueryString::convertToArray($request['extendsCount']));
+            QueryWith::setSum($request, $data);
         }
-        if (isset($request['doesntHave'])) {
+        if ($request->has('doesntHave')) {
             foreach (QueryString::convertToArray($request['doesntHave']) as $doesntHaveitem) {
-                $data = $data->doesntHave($doesntHaveitem);
+                $data->doesntHave($doesntHaveitem);
             }
         }
 
-        $data = Filter::where($data, $where);
-        $data = $data->findOrFail($id);
+        if (!empty($where)) {
+            Filter::applyWhereConditions($data, $where);
+        }
 
-        return $data;
+        return $data->findOrFail($id);
     }
 
-    public static function where($data, $where)
+    /**
+     * Применить сложные условия WHERE (включая has/doesntHave).
+     *
+     * @param Builder|QueryBuilder $query
+     * @param array $conditions Массив условий: [column, operator, value, relation]
+     * @return Builder|QueryBuilder
+     */
+    private static function applyWhereConditions(Builder|QueryBuilder $query, array $conditions): Builder|QueryBuilder
     {
-        // where для вложенных данных
-        foreach ($where as $dataWhere) {
-            if (!empty($dataWhere[4])) {
-                $data->whereDoesntHave($dataWhere[3], function ($query) use ($dataWhere) {
-                    $query->where($dataWhere[0], $dataWhere[1], $dataWhere[2]);
-                });
+        foreach ($conditions as $condition) {
+            [$column, $operator, $value, $relation] = array_pad($condition, 4, null);
 
-                continue;
+            if ($relation) {
+                if (isset($condition[4]) && $condition[4] === 'doesntHave') {
+                    $query->whereDoesntHave($relation, fn($q) => $q->where($column, $operator, $value));
+                } else {
+                    $query->whereHas($relation, fn($q) => $q->where($column, $operator, $value));
+                }
+            } else {
+                $query->where($column, $operator, $value);
             }
-
-            // 0 - название колонки, 1 - оператор (=, LIKE и прочее), 2 - значение, 3 - название связи 
-            if (!empty($dataWhere[3])) {
-                $data->whereHas($dataWhere[3], function ($query) use ($dataWhere) {
-                    $query->where($dataWhere[0], $dataWhere[1], $dataWhere[2]);
-                });
-
-                continue;
-            }
-
-            $data->where([$dataWhere]);
         }
 
-        return $data;
+        return $query;
     }
 }
